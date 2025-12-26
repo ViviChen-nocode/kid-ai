@@ -2,6 +2,7 @@
 
 const STORAGE_KEYS = {
   USER_NAME: 'userName',
+  USER_ROLE: 'userRole',
   LAST_PAGE: 'lastPage',
   QUIZ_SCORE: 'quizScore',
   QUIZ_COMPLETED: 'quizCompleted',
@@ -14,6 +15,15 @@ export const storage = {
 
   setUserName: (name: string): void => {
     localStorage.setItem(STORAGE_KEYS.USER_NAME, name);
+  },
+
+  getUserRole: (): number | null => {
+    const role = localStorage.getItem(STORAGE_KEYS.USER_ROLE);
+    return role ? parseInt(role, 10) : null;
+  },
+
+  setUserRole: (role: number): void => {
+    localStorage.setItem(STORAGE_KEYS.USER_ROLE, role.toString());
   },
 
   getLastPage: (): number => {

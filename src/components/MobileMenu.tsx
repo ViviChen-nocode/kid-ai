@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { chapters } from '@/lib/chapters';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { storage } from '@/lib/storage';
+import { useEffect, useState } from 'react';
 
 interface MobileMenuProps {
   userName: string;
@@ -28,6 +29,17 @@ const MobileMenu = ({
   onOpenAbout,
   onReset,
 }: MobileMenuProps) => {
+  const [userRole, setUserRole] = useState<number>(1);
+
+  useEffect(() => {
+    const role = storage.getUserRole();
+    if (role) {
+      setUserRole(role);
+    }
+  }, []);
+
+  const roleImagePath = `/role0${userRole}.png`;
+
   const handleNavigate = (page: number) => {
     onNavigate(page);
     onOpenChange(false);
@@ -53,10 +65,12 @@ const MobileMenu = ({
       <SheetContent side="left" className="w-80 p-0 bg-sidebar">
         <SheetHeader className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xl">
-                {userName.charAt(0).toUpperCase()}
-              </span>
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 flex items-center justify-center flex-shrink-0">
+              <img
+                src={roleImagePath}
+                alt={`角色 ${userRole}`}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="text-left flex-1">
               <p className="text-sm text-muted-foreground">歡迎回來</p>
@@ -116,12 +130,12 @@ const MobileMenu = ({
             </Button>
 
             {/* Divider */}
-            <div className="py-4">
-              <div className="border-t border-sidebar-border" />
+            <div className="py-2">
+              <div className="border-t border-sidebar-border/50" />
             </div>
 
             {/* Chapter Navigation */}
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
               📚 章節目錄
             </h3>
 
@@ -132,7 +146,7 @@ const MobileMenu = ({
                 <Button
                   key={chapter.id}
                   variant="nav"
-                  className={`w-full justify-start gap-2 h-auto py-3 px-3 text-left ${
+                  className={`w-full justify-start gap-2 h-auto py-2 px-3 text-left ${
                     isActive ? 'bg-sidebar-accent' : ''
                   }`}
                   onClick={() => handleNavigate(chapter.startPage)}
@@ -147,8 +161,8 @@ const MobileMenu = ({
             })}
 
             {/* Divider */}
-            <div className="py-4">
-              <div className="border-t border-sidebar-border" />
+            <div className="py-2">
+              <div className="border-t border-sidebar-border/50" />
             </div>
 
             {/* About Site */}

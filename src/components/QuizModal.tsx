@@ -125,9 +125,9 @@ const QuizModal = ({ isOpen, onClose, userName }: QuizModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-display flex items-center gap-2">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-5">
+        <DialogHeader className="pb-3">
+          <DialogTitle className="text-lg font-display flex items-center gap-2">
             {state === 'intro' && '🎯 AI 知識小測驗'}
             {state === 'question' && `📝 第 ${currentQuestionIndex + 1} 題`}
             {state === 'result' && (passed ? '🎉 太棒了！' : '💪 繼續加油！')}
@@ -136,14 +136,14 @@ const QuizModal = ({ isOpen, onClose, userName }: QuizModalProps) => {
 
         {/* Intro */}
         {state === 'intro' && (
-          <div className="space-y-6 py-4">
+          <div className="space-y-4 py-2">
             <div className="text-center">
-              <div className="text-6xl mb-4">🤖</div>
-              <p className="text-muted-foreground leading-relaxed">
+              <div className="text-5xl mb-3">🤖</div>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                 這個測驗有 <span className="font-bold text-foreground">10 道題目</span>，
                 測試你對 AI 的了解程度。
               </p>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-sm md:text-base text-muted-foreground mt-1.5">
                 答對 <span className="font-bold text-primary">{PASS_SCORE} 題以上</span>，
                 就能獲得獎勵卡喔！
               </p>
@@ -163,7 +163,7 @@ const QuizModal = ({ isOpen, onClose, userName }: QuizModalProps) => {
 
         {/* Question */}
         {state === 'question' && currentQuestion && (
-          <div className="space-y-6 py-4">
+          <div className="space-y-4 py-2">
             {/* Progress */}
             <div className="flex items-center gap-2">
               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
@@ -172,25 +172,25 @@ const QuizModal = ({ isOpen, onClose, userName }: QuizModalProps) => {
                   style={{ width: `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%` }}
                 />
               </div>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {currentQuestionIndex + 1}/{quizQuestions.length}
               </span>
             </div>
 
             {/* Question */}
-            <div className="bg-muted/50 rounded-xl p-4">
-              <p className="font-semibold text-lg leading-relaxed">
+            <div className="bg-muted/50 rounded-xl p-3">
+              <p className="font-semibold text-base leading-relaxed">
                 {currentQuestion.question}
               </p>
             </div>
 
             {/* Options */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {currentQuestion.options.map((option, index) => {
                 const isSelected = selectedAnswer === index;
                 const isCorrectAnswer = index === currentQuestion.correctAnswer;
                 
-                let buttonClass = 'w-full justify-start text-left h-auto py-4 px-4 border-2 transition-all';
+                let buttonClass = 'w-full justify-start text-left h-auto py-3 px-3 border-2 transition-all';
                 
                 if (showFeedback) {
                   if (isCorrectAnswer) {
@@ -214,15 +214,15 @@ const QuizModal = ({ isOpen, onClose, userName }: QuizModalProps) => {
                     onClick={() => handleAnswer(index)}
                     disabled={showFeedback}
                   >
-                    <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mr-3 shrink-0">
+                    <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center mr-3 shrink-0 text-sm">
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="flex-1">{option}</span>
+                    <span className="flex-1 text-sm md:text-base">{option}</span>
                     {showFeedback && isCorrectAnswer && (
-                      <CheckCircle className="w-5 h-5 text-success shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-success shrink-0" />
                     )}
                     {showFeedback && isSelected && !isCorrectAnswer && (
-                      <XCircle className="w-5 h-5 text-destructive shrink-0" />
+                      <XCircle className="w-4 h-4 text-destructive shrink-0" />
                     )}
                   </Button>
                 );
@@ -231,13 +231,13 @@ const QuizModal = ({ isOpen, onClose, userName }: QuizModalProps) => {
 
             {/* Feedback */}
             {showFeedback && (
-              <div className={`rounded-xl p-4 animate-fade-up ${
+              <div className={`rounded-xl p-3 animate-fade-up ${
                 isCorrect ? 'bg-success/10 border border-success/30' : 'bg-destructive/10 border border-destructive/30'
               }`}>
-                <p className={`font-semibold mb-1 ${isCorrect ? 'text-success' : 'text-destructive'}`}>
+                <p className={`font-semibold mb-1 text-sm ${isCorrect ? 'text-success' : 'text-destructive'}`}>
                   {isCorrect ? '✓ 答對了！' : '✗ 答錯了'}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {currentQuestion.explanation}
                 </p>
               </div>
@@ -260,16 +260,16 @@ const QuizModal = ({ isOpen, onClose, userName }: QuizModalProps) => {
 
         {/* Result */}
         {state === 'result' && (
-          <div className="space-y-6 py-4 text-center">
-            <div className="text-7xl mb-4">
+          <div className="space-y-4 py-2 text-center">
+            <div className="text-5xl mb-3">
               {passed ? '🏆' : '📚'}
             </div>
             
             <div>
-              <p className="text-4xl font-display font-bold text-gradient mb-2">
+              <p className="text-3xl font-display font-bold text-gradient mb-2">
                 {score} / {quizQuestions.length}
               </p>
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground">
                 {passed 
                   ? `太厲害了，${userName}！你真的很了解 AI！` 
                   : `${userName}，再多讀一些手冊內容，下次一定可以考得更好！`

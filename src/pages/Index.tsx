@@ -17,8 +17,9 @@ const Index = () => {
     setIsLoading(false);
   }, []);
 
-  const handleWelcomeComplete = (name: string) => {
+  const handleWelcomeComplete = (name: string, role: number) => {
     setUserName(name);
+    // Role is already saved in storage by WelcomeScreen
   };
 
   const handleReset = () => {
