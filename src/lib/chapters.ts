@@ -17,37 +17,37 @@ export const chapters: Chapter[] = [
   {
     id: 'chapter-1',
     title: '第一章：AI是什麼？我也能懂！',
-    startPage: 1,
+    startPage: 14,
     icon: '🤖',
   },
   {
     id: 'chapter-2',
     title: '第二章：怎麼和 AI 溝通？',
-    startPage: 9,
+    startPage: 22,
     icon: '💬',
   },
   {
     id: 'chapter-3',
     title: '第三章：AI小任務—我來試試看！',
-    startPage: 21,
+    startPage: 34,
     icon: '🎯',
   },
   {
     id: 'chapter-4',
     title: '第四章：AI說的一定對嗎？',
-    startPage: 33,
+    startPage: 46,
     icon: '🤔',
   },
   {
     id: 'chapter-5',
     title: '第五章：AI幫助我學習',
-    startPage: 38,
+    startPage: 51,
     icon: '📚',
   },
   {
     id: 'chapter-6',
     title: '第六章：AI時代的好公民',
-    startPage: 52,
+    startPage: 65,
     icon: '🌟',
   },
 ];

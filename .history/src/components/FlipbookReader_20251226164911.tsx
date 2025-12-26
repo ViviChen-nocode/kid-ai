@@ -240,10 +240,9 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
     }
   }, [zoom]);
 
-  // Reset zoom and position when page changes
-  // This resets to 100% zoom and centers the new page content when navigating
+  // Reset position when page changes (but keep zoom level)
+  // This centers the new page content when navigating
   useEffect(() => {
-    setZoom(1);
     setPosition({ x: 0, y: 0 });
   }, [currentPage]);
 

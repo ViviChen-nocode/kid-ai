@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { chapters } from '@/lib/chapters';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { storage } from '@/lib/storage';
 
 interface MobileMenuProps {
   userName: string;
@@ -68,10 +69,13 @@ const MobileMenu = ({
             <Button
               variant="nav"
               className="w-full justify-start gap-3 h-12"
-              onClick={() => handleNavigate(1)}
+              onClick={() => {
+                const targetPage = currentPage === 1 ? 1 : storage.getLastPage();
+                handleNavigate(targetPage);
+              }}
             >
               <Home className="w-5 h-5 text-primary" />
-              <span>回到首頁</span>
+              <span>{currentPage === 1 ? '開始閱讀' : '繼續閱讀'}</span>
             </Button>
 
             <Button
@@ -93,15 +97,6 @@ const MobileMenu = ({
             >
               <FileText className="w-5 h-5 text-accent" />
               <span>學習單</span>
-            </Button>
-
-            <Button
-              variant="nav"
-              className="w-full justify-start gap-3 h-12"
-              onClick={() => handleAction(onOpenAbout)}
-            >
-              <User className="w-5 h-5 text-mint" />
-              <span>關於作者</span>
             </Button>
 
             {/* Divider */}
@@ -134,6 +129,21 @@ const MobileMenu = ({
                 </Button>
               );
             })}
+
+            {/* Divider */}
+            <div className="py-4">
+              <div className="border-t border-sidebar-border" />
+            </div>
+
+            {/* About Site */}
+            <Button
+              variant="nav"
+              className="w-full justify-start gap-3 h-12"
+              onClick={() => handleAction(onOpenAbout)}
+            >
+              <User className="w-5 h-5 text-mint" />
+              <span>關於本站</span>
+            </Button>
           </div>
         </ScrollArea>
       </SheetContent>

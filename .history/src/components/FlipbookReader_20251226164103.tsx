@@ -88,7 +88,6 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [hasDragged, setHasDragged] = useState(false);
 
   // Save last page to localStorage
   useEffect(() => {
@@ -162,134 +161,17 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
 
   const handleZoomReset = useCallback(() => {
     setZoom(1);
-    setPosition({ x: 0, y: 0 });
   }, []);
-
-  // Pan/Drag handlers for zoomed pages
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (zoom > 1) {
-      setIsDragging(true);
-      setHasDragged(false);
-      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-    }
-  }, [zoom, position]);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging && zoom > 1) {
-      setHasDragged(true);
-      setPosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      });
-    }
-  }, [isDragging, zoom, dragStart]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setHasDragged(false);
-  }, []);
-
-  // Touch handlers for mobile
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (zoom > 1 && e.touches.length === 1) {
-      setIsDragging(true);
-      setHasDragged(false);
-      setDragStart({ 
-        x: e.touches[0].clientX - position.x, 
-        y: e.touches[0].clientY - position.y 
-      });
-    }
-  }, [zoom, position]);
-
-  const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (isDragging && zoom > 1 && e.touches.length === 1) {
-      e.preventDefault();
-      setHasDragged(true);
-      setPosition({
-        x: e.touches[0].clientX - dragStart.x,
-        y: e.touches[0].clientY - dragStart.y,
-      });
-    }
-  }, [isDragging, zoom, dragStart]);
-
-  const handleTouchEnd = useCallback(() => {
-    setIsDragging(false);
-    setHasDragged(false);
-  }, []);
-
-  // Add/remove event listeners for dragging
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleTouchMove, { passive: false });
-      window.addEventListener('touchend', handleTouchEnd);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-        window.removeEventListener('touchmove', handleTouchMove);
-        window.removeEventListener('touchend', handleTouchEnd);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
-
-  // Reset position when zoom changes to <= 1
-  useEffect(() => {
-    if (zoom <= 1) {
-      setPosition({ x: 0, y: 0 });
-    }
-  }, [zoom]);
-
-  // Reset zoom and position when page changes
-  // This resets to 100% zoom and centers the new page content when navigating
-  useEffect(() => {
-    setZoom(1);
-    setPosition({ x: 0, y: 0 });
-  }, [currentPage]);
 
   return (
-    <div className="flex-1 flex flex-col items-center p-4 md:p-8 relative">
-      {/* Navigation buttons - outside zoom container, always visible */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute left-0 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-card/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-card border-2 border-border disabled:opacity-30 z-30 transition-all"
-        onClick={(e) => {
-          e.stopPropagation();
-          goToPrevPage();
-        }}
-        disabled={currentPage === 1}
-        aria-label="上一頁"
-      >
-        <ChevronLeft className="w-8 h-8" />
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-0 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-card/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-card border-2 border-border disabled:opacity-30 z-30 transition-all"
-        onClick={(e) => {
-          e.stopPropagation();
-          goToNextPage();
-        }}
-        disabled={currentPage === TOTAL_PAGES}
-        aria-label="下一頁"
-      >
-        <ChevronRight className="w-8 h-8" />
-      </Button>
-
-      {/* Book container with pan/drag support */}
-      <div className="flex-1 w-full overflow-hidden flex items-center justify-center">
-        <div className={`relative w-full max-w-5xl ${isMobile ? 'max-w-md' : ''} flex items-center justify-center`}>
-          {/* Pages container with zoom and pan */}
-          <div 
-            className={`flex ${isCoverOrBack && !isMobile ? 'justify-center' : 'justify-center gap-1'} w-full transition-transform duration-300 origin-center ${zoom > 1 ? 'cursor-move' : ''}`}
-            style={{ 
-              transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-            }}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
-          >
+    <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 overflow-auto">
+      {/* Book container */}
+      <div className={`relative w-full max-w-5xl ${isMobile ? 'max-w-md' : ''} flex items-center justify-center`}>
+        {/* Pages container with zoom */}
+        <div 
+          className={`flex ${isCoverOrBack && !isMobile ? 'justify-center' : 'justify-center gap-1'} w-full transition-transform duration-300 origin-center`}
+          style={{ transform: `scale(${zoom})` }}
+        >
           {isMobile ? (
             // Mobile: Single page view
             <div className="w-full max-w-sm">
@@ -306,7 +188,7 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
                 pageNum={currentPage} 
                 flipDirection={flipDirection} 
                 isMobile={isMobile}
-                onClick={zoom <= 1 ? (currentPage === 1 ? goToNextPage : goToPrevPage) : undefined}
+                onClick={currentPage === 1 ? goToNextPage : goToPrevPage}
               />
             </div>
           ) : (
@@ -317,7 +199,7 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
                   pageNum={leftPage} 
                   flipDirection={flipDirection} 
                   isMobile={isMobile} 
-                  onClick={zoom <= 1 ? goToPrevPage : undefined}
+                  onClick={goToPrevPage}
                 />
               </div>
               {rightPage <= TOTAL_PAGES && (
@@ -326,18 +208,40 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
                     pageNum={rightPage} 
                     flipDirection={flipDirection} 
                     isMobile={isMobile} 
-                    onClick={zoom <= 1 ? goToNextPage : undefined}
+                    onClick={goToNextPage}
                   />
                 </div>
               )}
             </>
           )}
         </div>
-        </div>
+
+        {/* Navigation buttons - outside zoom container */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-16 h-12 w-12 rounded-full bg-card shadow-soft hover:shadow-card disabled:opacity-30 z-10"
+          onClick={goToPrevPage}
+          disabled={currentPage === 1}
+          aria-label="上一頁"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-16 h-12 w-12 rounded-full bg-card shadow-soft hover:shadow-card disabled:opacity-30 z-10"
+          onClick={goToNextPage}
+          disabled={currentPage === TOTAL_PAGES}
+          aria-label="下一頁"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </Button>
       </div>
 
-      {/* Zoom controls - at the bottom */}
-      <div className="mt-6 flex items-center justify-center gap-2 z-20">
+      {/* Zoom controls - centered at bottom */}
+      <div className="mt-6 flex items-center justify-center gap-2">
         <Button
           variant="ghost"
           size="icon"

@@ -2,6 +2,7 @@ import { Book, HelpCircle, FileText, User, ChevronRight, Home } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { chapters } from '@/lib/chapters';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { storage } from '@/lib/storage';
 
 interface SidebarProps {
   userName: string;
@@ -44,10 +45,13 @@ const Sidebar = ({
           <Button
             variant="nav"
             className="w-full justify-start gap-3 h-11"
-            onClick={() => onNavigate(1)}
+            onClick={() => {
+              const targetPage = currentPage === 1 ? 1 : storage.getLastPage();
+              onNavigate(targetPage);
+            }}
           >
             <Home className="w-5 h-5 text-primary" />
-            <span>回到首頁</span>
+            <span>{currentPage === 1 ? '開始閱讀' : '繼續閱讀'}</span>
           </Button>
 
           <Button
@@ -70,15 +74,6 @@ const Sidebar = ({
             <FileText className="w-5 h-5 text-accent" />
             <span>學習單</span>
           </Button>
-
-          <Button
-            variant="nav"
-            className="w-full justify-start gap-3 h-11"
-            onClick={onOpenAbout}
-          >
-            <User className="w-5 h-5 text-mint" />
-            <span>關於作者</span>
-          </Button>
         </div>
 
         {/* Chapter Navigation */}
@@ -88,7 +83,7 @@ const Sidebar = ({
           </h3>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1 mb-6">
           {chapters.map((chapter) => {
             const isActive = currentPage >= chapter.startPage;
             
@@ -110,14 +105,19 @@ const Sidebar = ({
             );
           })}
         </div>
-      </ScrollArea>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-sidebar-border">
-        <p className="text-xs text-center text-muted-foreground">
-          教育部《國小生生成式AI學習應用手冊》
-        </p>
-      </div>
+        {/* About Site */}
+        <div className="px-3">
+          <Button
+            variant="nav"
+            className="w-full justify-start gap-3 h-11"
+            onClick={onOpenAbout}
+          >
+            <User className="w-5 h-5 text-mint" />
+            <span>關於本站</span>
+          </Button>
+        </div>
+      </ScrollArea>
     </aside>
   );
 };

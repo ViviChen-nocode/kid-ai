@@ -186,14 +186,12 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-    setHasDragged(false);
   }, []);
 
   // Touch handlers for mobile
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (zoom > 1 && e.touches.length === 1) {
       setIsDragging(true);
-      setHasDragged(false);
       setDragStart({ 
         x: e.touches[0].clientX - position.x, 
         y: e.touches[0].clientY - position.y 
@@ -204,7 +202,6 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (isDragging && zoom > 1 && e.touches.length === 1) {
       e.preventDefault();
-      setHasDragged(true);
       setPosition({
         x: e.touches[0].clientX - dragStart.x,
         y: e.touches[0].clientY - dragStart.y,
@@ -214,7 +211,6 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
 
   const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
-    setHasDragged(false);
   }, []);
 
   // Add/remove event listeners for dragging
@@ -233,111 +229,21 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
     }
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
-  // Reset position when zoom changes to <= 1
+  // Reset position when zoom changes or page changes
   useEffect(() => {
     if (zoom <= 1) {
       setPosition({ x: 0, y: 0 });
     }
   }, [zoom]);
 
-  // Reset zoom and position when page changes
-  // This resets to 100% zoom and centers the new page content when navigating
   useEffect(() => {
-    setZoom(1);
     setPosition({ x: 0, y: 0 });
   }, [currentPage]);
 
   return (
-    <div className="flex-1 flex flex-col items-center p-4 md:p-8 relative">
-      {/* Navigation buttons - outside zoom container, always visible */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute left-0 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-card/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-card border-2 border-border disabled:opacity-30 z-30 transition-all"
-        onClick={(e) => {
-          e.stopPropagation();
-          goToPrevPage();
-        }}
-        disabled={currentPage === 1}
-        aria-label="上一頁"
-      >
-        <ChevronLeft className="w-8 h-8" />
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-0 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-card/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-card border-2 border-border disabled:opacity-30 z-30 transition-all"
-        onClick={(e) => {
-          e.stopPropagation();
-          goToNextPage();
-        }}
-        disabled={currentPage === TOTAL_PAGES}
-        aria-label="下一頁"
-      >
-        <ChevronRight className="w-8 h-8" />
-      </Button>
-
-      {/* Book container with pan/drag support */}
-      <div className="flex-1 w-full overflow-hidden flex items-center justify-center">
-        <div className={`relative w-full max-w-5xl ${isMobile ? 'max-w-md' : ''} flex items-center justify-center`}>
-          {/* Pages container with zoom and pan */}
-          <div 
-            className={`flex ${isCoverOrBack && !isMobile ? 'justify-center' : 'justify-center gap-1'} w-full transition-transform duration-300 origin-center ${zoom > 1 ? 'cursor-move' : ''}`}
-            style={{ 
-              transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-            }}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
-          >
-          {isMobile ? (
-            // Mobile: Single page view
-            <div className="w-full max-w-sm">
-              <Page 
-                pageNum={currentPage} 
-                flipDirection={flipDirection} 
-                isMobile={isMobile}
-              />
-            </div>
-          ) : isCoverOrBack ? (
-            // Desktop: Single page for cover/back
-            <div className="w-1/2 max-w-md">
-              <Page 
-                pageNum={currentPage} 
-                flipDirection={flipDirection} 
-                isMobile={isMobile}
-                onClick={zoom <= 1 ? (currentPage === 1 ? goToNextPage : goToPrevPage) : undefined}
-              />
-            </div>
-          ) : (
-            // Desktop: Spread view (two pages)
-            <>
-              <div className="w-1/2 transform origin-right">
-                <Page 
-                  pageNum={leftPage} 
-                  flipDirection={flipDirection} 
-                  isMobile={isMobile} 
-                  onClick={zoom <= 1 ? goToPrevPage : undefined}
-                />
-              </div>
-              {rightPage <= TOTAL_PAGES && (
-                <div className="w-1/2 transform origin-left">
-                  <Page 
-                    pageNum={rightPage} 
-                    flipDirection={flipDirection} 
-                    isMobile={isMobile} 
-                    onClick={zoom <= 1 ? goToNextPage : undefined}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        </div>
-      </div>
-
-      {/* Zoom controls - at the bottom */}
-      <div className="mt-6 flex items-center justify-center gap-2 z-20">
+    <div className="flex-1 flex flex-col items-center p-4 md:p-8">
+      {/* Zoom controls - at the top */}
+      <div className="mb-4 flex items-center justify-center gap-2 z-20">
         <Button
           variant="ghost"
           size="icon"
@@ -368,6 +274,87 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
         >
           <ZoomIn className="w-5 h-5" />
         </Button>
+      </div>
+
+      {/* Book container with pan/drag support */}
+      <div className="flex-1 w-full overflow-hidden flex items-center justify-center">
+        <div className={`relative w-full max-w-5xl ${isMobile ? 'max-w-md' : ''} flex items-center justify-center`}>
+          {/* Pages container with zoom and pan */}
+          <div 
+            className={`flex ${isCoverOrBack && !isMobile ? 'justify-center' : 'justify-center gap-1'} w-full transition-transform duration-300 origin-center ${zoom > 1 ? 'cursor-move' : ''}`}
+            style={{ 
+              transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+            }}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+          >
+          {isMobile ? (
+            // Mobile: Single page view
+            <div className="w-full max-w-sm">
+              <Page 
+                pageNum={currentPage} 
+                flipDirection={flipDirection} 
+                isMobile={isMobile}
+              />
+            </div>
+          ) : isCoverOrBack ? (
+            // Desktop: Single page for cover/back
+            <div className="w-1/2 max-w-md">
+              <Page 
+                pageNum={currentPage} 
+                flipDirection={flipDirection} 
+                isMobile={isMobile}
+                onClick={currentPage === 1 ? goToNextPage : goToPrevPage}
+              />
+            </div>
+          ) : (
+            // Desktop: Spread view (two pages)
+            <>
+              <div className="w-1/2 transform origin-right">
+                <Page 
+                  pageNum={leftPage} 
+                  flipDirection={flipDirection} 
+                  isMobile={isMobile} 
+                  onClick={goToPrevPage}
+                />
+              </div>
+              {rightPage <= TOTAL_PAGES && (
+                <div className="w-1/2 transform origin-left">
+                  <Page 
+                    pageNum={rightPage} 
+                    flipDirection={flipDirection} 
+                    isMobile={isMobile} 
+                    onClick={goToNextPage}
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Navigation buttons - outside zoom container */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-16 h-12 w-12 rounded-full bg-card shadow-soft hover:shadow-card disabled:opacity-30 z-10"
+          onClick={goToPrevPage}
+          disabled={currentPage === 1}
+          aria-label="上一頁"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-16 h-12 w-12 rounded-full bg-card shadow-soft hover:shadow-card disabled:opacity-30 z-10"
+          onClick={goToNextPage}
+          disabled={currentPage === TOTAL_PAGES}
+          aria-label="下一頁"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </Button>
+      </div>
       </div>
     </div>
   );

@@ -233,53 +233,50 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
     }
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
-  // Reset position when zoom changes to <= 1
+  // Reset position when zoom changes or page changes
   useEffect(() => {
     if (zoom <= 1) {
       setPosition({ x: 0, y: 0 });
     }
   }, [zoom]);
 
-  // Reset zoom and position when page changes
-  // This resets to 100% zoom and centers the new page content when navigating
   useEffect(() => {
-    setZoom(1);
     setPosition({ x: 0, y: 0 });
   }, [currentPage]);
 
   return (
-    <div className="flex-1 flex flex-col items-center p-4 md:p-8 relative">
-      {/* Navigation buttons - outside zoom container, always visible */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute left-0 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-card/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-card border-2 border-border disabled:opacity-30 z-30 transition-all"
-        onClick={(e) => {
-          e.stopPropagation();
-          goToPrevPage();
-        }}
-        disabled={currentPage === 1}
-        aria-label="上一頁"
-      >
-        <ChevronLeft className="w-8 h-8" />
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-0 top-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-card/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-card border-2 border-border disabled:opacity-30 z-30 transition-all"
-        onClick={(e) => {
-          e.stopPropagation();
-          goToNextPage();
-        }}
-        disabled={currentPage === TOTAL_PAGES}
-        aria-label="下一頁"
-      >
-        <ChevronRight className="w-8 h-8" />
-      </Button>
-
+    <div className="flex-1 flex flex-col items-center p-4 md:p-8">
       {/* Book container with pan/drag support */}
-      <div className="flex-1 w-full overflow-hidden flex items-center justify-center">
+      <div className="flex-1 w-full overflow-hidden flex items-center justify-center relative">
+        {/* Navigation buttons - outside zoom container, always visible */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 h-14 w-14 rounded-full bg-card/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-card border-2 border-border disabled:opacity-30 z-30 transition-all"
+          onClick={(e) => {
+            e.stopPropagation();
+            goToPrevPage();
+          }}
+          disabled={currentPage === 1}
+          aria-label="上一頁"
+        >
+          <ChevronLeft className="w-8 h-8" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-14 w-14 rounded-full bg-card/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-card border-2 border-border disabled:opacity-30 z-30 transition-all"
+          onClick={(e) => {
+            e.stopPropagation();
+            goToNextPage();
+          }}
+          disabled={currentPage === TOTAL_PAGES}
+          aria-label="下一頁"
+        >
+          <ChevronRight className="w-8 h-8" />
+        </Button>
+
         <div className={`relative w-full max-w-5xl ${isMobile ? 'max-w-md' : ''} flex items-center justify-center`}>
           {/* Pages container with zoom and pan */}
           <div 

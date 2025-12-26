@@ -13,7 +13,7 @@ const AboutModal = ({ isOpen, onClose }: AboutModalProps) => {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-display flex items-center gap-2">
-            👩‍💻 關於作者
+            🌐 關於本站
           </DialogTitle>
         </DialogHeader>
 
@@ -39,23 +39,20 @@ const AboutModal = ({ isOpen, onClose }: AboutModalProps) => {
 
           {/* Links */}
           <div className="space-y-3">
-            <a
-              href="https://www.facebook.com/vivichen.sister"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 h-12"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open('https://www.facebook.com/vivichen.sister', '_blank', 'noopener,noreferrer');
+              }}
             >
-              <Button
-                variant="outline"
-                className="w-full justify-start gap-3 h-12"
-              >
-                <div className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center">
-                  <span className="text-white text-lg">f</span>
-                </div>
-                <span>Facebook 粉絲專頁</span>
-                <ExternalLink className="w-4 h-4 ml-auto text-muted-foreground" />
-              </Button>
-            </a>
+              <div className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center">
+                <span className="text-white text-lg">f</span>
+              </div>
+              <span>Facebook 粉絲專頁</span>
+              <ExternalLink className="w-4 h-4 ml-auto text-muted-foreground" />
+            </Button>
 
             <a
               href="mailto:thevividai@gmail.com"
