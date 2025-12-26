@@ -1,0 +1,308 @@
+import { useState } from 'react';
+import { X, CheckCircle, XCircle, Trophy, Download, RotateCcw, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { quizQuestions, PASS_SCORE, type QuizQuestion } from '@/lib/quizData';
+import { storage } from '@/lib/storage';
+
+interface QuizModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  userName: string;
+}
+
+type QuizState = 'intro' | 'question' | 'result';
+
+const QuizModal = ({ isOpen, onClose, userName }: QuizModalProps) => {
+  const [state, setState] = useState<QuizState>('intro');
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [score, setScore] = useState(0);
+  const [answers, setAnswers] = useState<number[]>([]);
+
+  const currentQuestion = quizQuestions[currentQuestionIndex];
+  const isCorrect = selectedAnswer === currentQuestion?.correctAnswer;
+  const passed = score >= PASS_SCORE;
+
+  const startQuiz = () => {
+    setState('question');
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setAnswers([]);
+    setSelectedAnswer(null);
+    setShowFeedback(false);
+  };
+
+  const handleAnswer = (answerIndex: number) => {
+    if (showFeedback) return;
+    
+    setSelectedAnswer(answerIndex);
+    setShowFeedback(true);
+    
+    if (answerIndex === currentQuestion.correctAnswer) {
+      setScore((prev) => prev + 1);
+    }
+    setAnswers((prev) => [...prev, answerIndex]);
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestionIndex < quizQuestions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setSelectedAnswer(null);
+      setShowFeedback(false);
+    } else {
+      // Quiz complete
+      setState('result');
+      storage.setQuizScore(score);
+      storage.setQuizCompleted(true);
+    }
+  };
+
+  const downloadReward = () => {
+    // Create a simple reward card using canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, 600, 400);
+      gradient.addColorStop(0, '#FFF5E6');
+      gradient.addColorStop(1, '#FFE4CC');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 600, 400);
+
+      // Border
+      ctx.strokeStyle = '#F97316';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(20, 20, 560, 360);
+
+      // Title
+      ctx.fillStyle = '#1E293B';
+      ctx.font = 'bold 32px Comic Neue, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🏆 AI 學習小達人 🏆', 300, 80);
+
+      // Name
+      ctx.font = 'bold 48px Comic Neue, sans-serif';
+      ctx.fillStyle = '#F97316';
+      ctx.fillText(userName, 300, 160);
+
+      // Score
+      ctx.font = '24px Nunito, sans-serif';
+      ctx.fillStyle = '#64748B';
+      ctx.fillText(`測驗成績：${score} / ${quizQuestions.length}`, 300, 220);
+
+      // Message
+      ctx.font = '20px Nunito, sans-serif';
+      ctx.fillStyle = '#1E293B';
+      ctx.fillText('恭喜你完成了 AI 學習測驗！', 300, 280);
+      ctx.fillText('你已經是 AI 時代的小達人了！', 300, 310);
+
+      // Date
+      ctx.font = '16px Nunito, sans-serif';
+      ctx.fillStyle = '#94A3B8';
+      ctx.fillText(new Date().toLocaleDateString('zh-TW'), 300, 360);
+
+      // Download
+      const link = document.createElement('a');
+      link.download = `${userName}_AI學習獎勵卡.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  };
+
+  const resetQuiz = () => {
+    setState('intro');
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setAnswers([]);
+    setSelectedAnswer(null);
+    setShowFeedback(false);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-display flex items-center gap-2">
+            {state === 'intro' && '🎯 AI 知識小測驗'}
+            {state === 'question' && `📝 第 ${currentQuestionIndex + 1} 題`}
+            {state === 'result' && (passed ? '🎉 太棒了！' : '💪 繼續加油！')}
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Intro */}
+        {state === 'intro' && (
+          <div className="space-y-6 py-4">
+            <div className="text-center">
+              <div className="text-6xl mb-4">🤖</div>
+              <p className="text-muted-foreground leading-relaxed">
+                這個測驗有 <span className="font-bold text-foreground">10 道題目</span>，
+                測試你對 AI 的了解程度。
+              </p>
+              <p className="text-muted-foreground mt-2">
+                答對 <span className="font-bold text-primary">{PASS_SCORE} 題以上</span>，
+                就能獲得獎勵卡喔！
+              </p>
+            </div>
+
+            <Button
+              variant="playful"
+              size="lg"
+              className="w-full"
+              onClick={startQuiz}
+            >
+              開始測驗！
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Question */}
+        {state === 'question' && currentQuestion && (
+          <div className="space-y-6 py-4">
+            {/* Progress */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full gradient-primary transition-all duration-300"
+                  style={{ width: `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%` }}
+                />
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {currentQuestionIndex + 1}/{quizQuestions.length}
+              </span>
+            </div>
+
+            {/* Question */}
+            <div className="bg-muted/50 rounded-xl p-4">
+              <p className="font-semibold text-lg leading-relaxed">
+                {currentQuestion.question}
+              </p>
+            </div>
+
+            {/* Options */}
+            <div className="space-y-3">
+              {currentQuestion.options.map((option, index) => {
+                const isSelected = selectedAnswer === index;
+                const isCorrectAnswer = index === currentQuestion.correctAnswer;
+                
+                let buttonClass = 'w-full justify-start text-left h-auto py-4 px-4 border-2 transition-all';
+                
+                if (showFeedback) {
+                  if (isCorrectAnswer) {
+                    buttonClass += ' border-success bg-success/10 text-success';
+                  } else if (isSelected && !isCorrectAnswer) {
+                    buttonClass += ' border-destructive bg-destructive/10 text-destructive';
+                  } else {
+                    buttonClass += ' border-border opacity-50';
+                  }
+                } else if (isSelected) {
+                  buttonClass += ' border-primary bg-primary/10';
+                } else {
+                  buttonClass += ' border-border hover:border-primary/50';
+                }
+
+                return (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    className={buttonClass}
+                    onClick={() => handleAnswer(index)}
+                    disabled={showFeedback}
+                  >
+                    <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mr-3 shrink-0">
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <span className="flex-1">{option}</span>
+                    {showFeedback && isCorrectAnswer && (
+                      <CheckCircle className="w-5 h-5 text-success shrink-0" />
+                    )}
+                    {showFeedback && isSelected && !isCorrectAnswer && (
+                      <XCircle className="w-5 h-5 text-destructive shrink-0" />
+                    )}
+                  </Button>
+                );
+              })}
+            </div>
+
+            {/* Feedback */}
+            {showFeedback && (
+              <div className={`rounded-xl p-4 animate-fade-up ${
+                isCorrect ? 'bg-success/10 border border-success/30' : 'bg-destructive/10 border border-destructive/30'
+              }`}>
+                <p className={`font-semibold mb-1 ${isCorrect ? 'text-success' : 'text-destructive'}`}>
+                  {isCorrect ? '✓ 答對了！' : '✗ 答錯了'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {currentQuestion.explanation}
+                </p>
+              </div>
+            )}
+
+            {/* Next button */}
+            {showFeedback && (
+              <Button
+                variant="playful"
+                size="lg"
+                className="w-full animate-fade-up"
+                onClick={nextQuestion}
+              >
+                {currentQuestionIndex < quizQuestions.length - 1 ? '下一題' : '看結果'}
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Result */}
+        {state === 'result' && (
+          <div className="space-y-6 py-4 text-center">
+            <div className="text-7xl mb-4">
+              {passed ? '🏆' : '📚'}
+            </div>
+            
+            <div>
+              <p className="text-4xl font-display font-bold text-gradient mb-2">
+                {score} / {quizQuestions.length}
+              </p>
+              <p className="text-muted-foreground">
+                {passed 
+                  ? `太厲害了，${userName}！你真的很了解 AI！` 
+                  : `${userName}，再多讀一些手冊內容，下次一定可以考得更好！`
+                }
+              </p>
+            </div>
+
+            {passed && (
+              <Button
+                variant="playful"
+                size="lg"
+                className="w-full"
+                onClick={downloadReward}
+              >
+                <Download className="w-5 h-5" />
+                下載獎勵卡
+              </Button>
+            )}
+
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={resetQuiz}
+            >
+              <RotateCcw className="w-5 h-5" />
+              再試一次
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default QuizModal;

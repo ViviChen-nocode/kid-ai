@@ -1,0 +1,144 @@
+import { Menu, X, Home, HelpCircle, FileText, User, ChevronRight, Book } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { chapters } from '@/lib/chapters';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+interface MobileMenuProps {
+  userName: string;
+  currentPage: number;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onNavigate: (page: number) => void;
+  onOpenQuiz: () => void;
+  onOpenWorksheet: () => void;
+  onOpenAbout: () => void;
+}
+
+const MobileMenu = ({
+  userName,
+  currentPage,
+  isOpen,
+  onOpenChange,
+  onNavigate,
+  onOpenQuiz,
+  onOpenWorksheet,
+  onOpenAbout,
+}: MobileMenuProps) => {
+  const handleNavigate = (page: number) => {
+    onNavigate(page);
+    onOpenChange(false);
+  };
+
+  const handleAction = (action: () => void) => {
+    action();
+    onOpenChange(false);
+  };
+
+  return (
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden fixed top-4 left-4 z-50 bg-card shadow-soft rounded-full"
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+      </SheetTrigger>
+
+      <SheetContent side="left" className="w-80 p-0 bg-sidebar">
+        <SheetHeader className="p-6 border-b border-sidebar-border">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xl">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="text-left">
+              <p className="text-sm text-muted-foreground">歡迎回來</p>
+              <SheetTitle className="text-lg font-bold">{userName}</SheetTitle>
+            </div>
+          </div>
+        </SheetHeader>
+
+        <ScrollArea className="h-[calc(100vh-140px)]">
+          <div className="p-4 space-y-1">
+            {/* Quick Actions */}
+            <Button
+              variant="nav"
+              className="w-full justify-start gap-3 h-12"
+              onClick={() => handleNavigate(1)}
+            >
+              <Home className="w-5 h-5 text-primary" />
+              <span>回到首頁</span>
+            </Button>
+
+            <Button
+              variant="nav"
+              className="w-full justify-start gap-3 h-12"
+              onClick={() => handleAction(onOpenQuiz)}
+            >
+              <HelpCircle className="w-5 h-5 text-secondary" />
+              <span>小測驗</span>
+              <span className="ml-auto text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
+                10題
+              </span>
+            </Button>
+
+            <Button
+              variant="nav"
+              className="w-full justify-start gap-3 h-12"
+              onClick={() => handleAction(onOpenWorksheet)}
+            >
+              <FileText className="w-5 h-5 text-accent" />
+              <span>學習單</span>
+            </Button>
+
+            <Button
+              variant="nav"
+              className="w-full justify-start gap-3 h-12"
+              onClick={() => handleAction(onOpenAbout)}
+            >
+              <User className="w-5 h-5 text-mint" />
+              <span>關於作者</span>
+            </Button>
+
+            {/* Divider */}
+            <div className="py-4">
+              <div className="border-t border-sidebar-border" />
+            </div>
+
+            {/* Chapter Navigation */}
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+              📚 章節目錄
+            </h3>
+
+            {chapters.map((chapter) => {
+              const isActive = currentPage >= chapter.startPage;
+
+              return (
+                <Button
+                  key={chapter.id}
+                  variant="nav"
+                  className={`w-full justify-start gap-2 h-auto py-3 px-3 text-left ${
+                    isActive ? 'bg-sidebar-accent' : ''
+                  }`}
+                  onClick={() => handleNavigate(chapter.startPage)}
+                >
+                  <span className="text-lg shrink-0">{chapter.icon}</span>
+                  <span className="text-sm leading-tight flex-1">
+                    {chapter.title}
+                  </span>
+                  <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
+                </Button>
+              );
+            })}
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  );
+};
+
+export default MobileMenu;
