@@ -5,6 +5,80 @@ import { TOTAL_PAGES } from '@/lib/chapters';
 import { storage } from '@/lib/storage';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+// Get image path for a page number
+const getPageImagePath = (pageNum: number) => {
+  return `/pages/edu-${pageNum.toString().padStart(2, '0')}.png`;
+};
+
+// Separate component for rendering a page (hooks must be at top level)
+interface PageProps {
+  pageNum: number;
+  flipDirection: 'left' | 'right' | null;
+  isMobile: boolean;
+}
+
+const Page = ({ pageNum, flipDirection, isMobile }: PageProps) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div
+      className={`relative bg-card rounded-lg shadow-card overflow-hidden transition-transform duration-300
+        ${flipDirection === 'left' && !isMobile ? 'animate-page-flip-left' : ''}
+        ${flipDirection === 'right' && !isMobile ? 'animate-page-flip-right' : ''}
+      `}
+      style={{
+        aspectRatio: '210 / 297', // A4 ratio
+      }}
+    >
+      {/* Page image */}
+      <img
+        src={getPageImagePath(pageNum)}
+        alt={`第 ${pageNum} 頁`}
+        className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+          imageLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        onLoad={() => setImageLoaded(true)}
+        onError={() => setImageError(true)}
+        loading="lazy"
+      />
+
+      {/* Loading placeholder */}
+      {!imageLoaded && !imageError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-peach to-card">
+          <div className="animate-pulse text-center">
+            <div className="text-4xl mb-2">📖</div>
+            <span className="text-muted-foreground text-sm">
+              載入中...
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Error placeholder */}
+      {imageError && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-peach to-card">
+          <div className="text-center">
+            <div className="text-4xl mb-2 opacity-50">📄</div>
+            <span className="text-muted-foreground text-sm">
+              第 {pageNum} 頁
+            </span>
+            <p className="text-xs text-muted-foreground/60 mt-1">
+              (圖片尚未上傳)
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Page number */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-foreground/10 rounded-full px-3 py-1">
+        <span className="text-xs font-medium text-foreground/70">
+          {pageNum}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 interface FlipbookReaderProps {
   currentPage: number;
@@ -65,75 +139,6 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goToPrevPage, goToNextPage]);
 
-  // Get image path for a page number
-  const getPageImagePath = (pageNum: number) => {
-    return `/pages/edu-${pageNum.toString().padStart(2, '0')}.png`;
-  };
-
-  // Render page with actual image
-  const renderPage = (pageNum: number) => {
-    const [imageLoaded, setImageLoaded] = useState(false);
-    const [imageError, setImageError] = useState(false);
-
-    return (
-      <div
-        className={`relative bg-card rounded-lg shadow-card overflow-hidden transition-transform duration-300
-          ${flipDirection === 'left' && !isMobile ? 'animate-page-flip-left' : ''}
-          ${flipDirection === 'right' && !isMobile ? 'animate-page-flip-right' : ''}
-        `}
-        style={{
-          aspectRatio: '210 / 297', // A4 ratio
-        }}
-      >
-        {/* Page image */}
-        <img
-          src={getPageImagePath(pageNum)}
-          alt={`第 ${pageNum} 頁`}
-          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
-          loading="lazy"
-        />
-
-        {/* Loading placeholder */}
-        {!imageLoaded && !imageError && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-peach to-card">
-            <div className="animate-pulse text-center">
-              <div className="text-4xl mb-2">📖</div>
-              <span className="text-muted-foreground text-sm">
-                載入中...
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Error placeholder */}
-        {imageError && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-peach to-card">
-            <div className="text-center">
-              <div className="text-4xl mb-2 opacity-50">📄</div>
-              <span className="text-muted-foreground text-sm">
-                第 {pageNum} 頁
-              </span>
-              <p className="text-xs text-muted-foreground/60 mt-1">
-                (圖片尚未上傳)
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Page number */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-foreground/10 rounded-full px-3 py-1">
-          <span className="text-xs font-medium text-foreground/70">
-            {pageNum}
-          </span>
-        </div>
-      </div>
-    );
-  };
-
   const isFirstPage = currentPage === 1;
   const isLastPage = currentPage === TOTAL_PAGES;
   const isCoverOrBack = isFirstPage || isLastPage;
@@ -151,22 +156,22 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
           {isMobile ? (
             // Mobile: Single page view
             <div className="w-full max-w-sm">
-              {renderPage(currentPage)}
+              <Page pageNum={currentPage} flipDirection={flipDirection} isMobile={isMobile} />
             </div>
           ) : isCoverOrBack ? (
             // Desktop: Single page for cover/back
             <div className="w-1/2 max-w-md">
-              {renderPage(currentPage)}
+              <Page pageNum={currentPage} flipDirection={flipDirection} isMobile={isMobile} />
             </div>
           ) : (
             // Desktop: Spread view (two pages)
             <>
               <div className="w-1/2 transform origin-right">
-                {renderPage(leftPage)}
+                <Page pageNum={leftPage} flipDirection={flipDirection} isMobile={isMobile} />
               </div>
               {rightPage <= TOTAL_PAGES && (
                 <div className="w-1/2 transform origin-left">
-                  {renderPage(rightPage)}
+                  <Page pageNum={rightPage} flipDirection={flipDirection} isMobile={isMobile} />
                 </div>
               )}
             </>
