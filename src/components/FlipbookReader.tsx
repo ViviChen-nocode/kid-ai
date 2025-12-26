@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { TOTAL_PAGES } from '@/lib/chapters';
 import { storage } from '@/lib/storage';
 import { useIsMobile } from '@/hooks/use-mobile';
-import coverIllustration from '@/assets/cover-illustration.png';
+
 
 interface FlipbookReaderProps {
   currentPage: number;
@@ -65,10 +65,15 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goToPrevPage, goToNextPage]);
 
-  // Generate placeholder page content
+  // Get image path for a page number
+  const getPageImagePath = (pageNum: number) => {
+    return `/pages/edu-${pageNum.toString().padStart(2, '0')}.png`;
+  };
+
+  // Render page with actual image
   const renderPage = (pageNum: number) => {
-    const isFirstPage = pageNum === 1;
-    const isLastPage = pageNum === TOTAL_PAGES;
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     return (
       <div
@@ -80,50 +85,44 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
           aspectRatio: '210 / 297', // A4 ratio
         }}
       >
-        {/* Page content placeholder - will be replaced with actual images */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-peach to-card">
-          {isFirstPage && (
+        {/* Page image */}
+        <img
+          src={getPageImagePath(pageNum)}
+          alt={`第 ${pageNum} 頁`}
+          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
+          loading="lazy"
+        />
+
+        {/* Loading placeholder */}
+        {!imageLoaded && !imageError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-peach to-card">
+            <div className="animate-pulse text-center">
+              <div className="text-4xl mb-2">📖</div>
+              <span className="text-muted-foreground text-sm">
+                載入中...
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Error placeholder */}
+        {imageError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-peach to-card">
             <div className="text-center">
-              <img 
-                src={coverIllustration} 
-                alt="封面" 
-                className="w-32 h-32 object-cover rounded-2xl mx-auto mb-4 shadow-soft"
-              />
-              <h2 className="text-2xl font-display font-bold text-gradient mb-2">
-                和你一起學 AI
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                國小生生成式AI學習應用手冊
+              <div className="text-4xl mb-2 opacity-50">📄</div>
+              <span className="text-muted-foreground text-sm">
+                第 {pageNum} 頁
+              </span>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                (圖片尚未上傳)
               </p>
             </div>
-          )}
-          {isLastPage && (
-            <div className="text-center">
-              <div className="text-6xl mb-4">🌟</div>
-              <h2 className="text-xl font-display font-bold mb-2">
-                恭喜你讀完了！
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                希望你學到了很多關於 AI 的知識！
-              </p>
-            </div>
-          )}
-          {!isFirstPage && !isLastPage && (
-            <div className="text-center w-full h-full flex flex-col items-center justify-center">
-              <div className="w-full h-full min-h-[200px] bg-muted/30 rounded-lg flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                <div className="text-center">
-                  <div className="text-4xl mb-2 opacity-50">📄</div>
-                  <span className="text-muted-foreground text-sm">
-                    第 {pageNum} 頁
-                  </span>
-                  <p className="text-xs text-muted-foreground/60 mt-1">
-                    (等待載入圖片)
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Page number */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-foreground/10 rounded-full px-3 py-1">
