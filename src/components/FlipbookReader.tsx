@@ -17,9 +17,10 @@ interface PageProps {
   flipDirection: 'left' | 'right' | null;
   isMobile: boolean;
   onClick?: () => void;
+  isVisible?: boolean; // Whether this page is currently visible
 }
 
-const Page = ({ pageNum, shouldFlip, flipDirection, isMobile, onClick }: PageProps) => {
+const Page = ({ pageNum, shouldFlip, flipDirection, isMobile, onClick, isVisible = false }: PageProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -43,7 +44,7 @@ const Page = ({ pageNum, shouldFlip, flipDirection, isMobile, onClick }: PagePro
         }`}
         onLoad={() => setImageLoaded(true)}
         onError={() => setImageError(true)}
-        loading="lazy"
+        loading={isVisible ? "eager" : "lazy"}
       />
 
       {/* Loading placeholder */}
@@ -232,6 +233,45 @@ const FlipbookReader = ({ currentPage, onPageChange, zoom, setZoom, position, se
     }
   }, [zoom, setPosition]);
 
+  // Preload adjacent pages for smoother navigation
+  useEffect(() => {
+    const preloadPages = () => {
+      const pagesToPreload: number[] = [];
+      
+      if (isMobile) {
+        // Mobile: preload next and previous page
+        if (currentPage > 1) pagesToPreload.push(currentPage - 1);
+        if (currentPage < TOTAL_PAGES) pagesToPreload.push(currentPage + 1);
+      } else {
+        // Desktop: preload pages around the current spread view
+        const leftPage = currentPage % 2 === 0 ? currentPage : currentPage - 1;
+        const rightPage = currentPage % 2 === 0 ? currentPage + 1 : currentPage;
+        
+        // Preload 2 pages before and after the spread
+        if (leftPage > 2) {
+          pagesToPreload.push(leftPage - 2);
+          pagesToPreload.push(leftPage - 1);
+        }
+        if (rightPage < TOTAL_PAGES - 1) {
+          pagesToPreload.push(rightPage + 1);
+          pagesToPreload.push(rightPage + 2);
+        }
+      }
+
+      // Preload images
+      pagesToPreload.forEach((pageNum) => {
+        if (pageNum >= 1 && pageNum <= TOTAL_PAGES) {
+          const img = new Image();
+          img.src = getPageImagePath(pageNum);
+        }
+      });
+    };
+
+    // Delay preloading slightly to prioritize current page
+    const timeoutId = setTimeout(preloadPages, 300);
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, isMobile]);
+
   return (
     <div className="flex-1 flex flex-col items-center px-4 md:px-2 pt-0 md:pt-0 pb-4 md:pb-2 relative">
       {/* Navigation buttons - outside zoom container, always visible */}
@@ -283,6 +323,7 @@ const FlipbookReader = ({ currentPage, onPageChange, zoom, setZoom, position, se
                 shouldFlip={!!flipDirection}
                 flipDirection={flipDirection} 
                 isMobile={isMobile}
+                isVisible={true}
               />
             </div>
           ) : isCoverOrBack ? (
@@ -294,6 +335,7 @@ const FlipbookReader = ({ currentPage, onPageChange, zoom, setZoom, position, se
                 flipDirection={flipDirection} 
                 isMobile={isMobile}
                 onClick={zoom <= 1 ? (currentPage === 1 ? goToNextPage : goToPrevPage) : undefined}
+                isVisible={true}
               />
             </div>
           ) : (
@@ -306,6 +348,7 @@ const FlipbookReader = ({ currentPage, onPageChange, zoom, setZoom, position, se
                   flipDirection={flipDirection === 'left' ? 'right' : null} // But flip direction is reversed
                   isMobile={isMobile} 
                   onClick={zoom <= 1 ? goToPrevPage : undefined}
+                  isVisible={true}
                 />
               </div>
               {rightPage <= TOTAL_PAGES && (
@@ -316,6 +359,7 @@ const FlipbookReader = ({ currentPage, onPageChange, zoom, setZoom, position, se
                     flipDirection={flipDirection === 'right' ? 'left' : null} // But flip direction is reversed
                     isMobile={isMobile} 
                     onClick={zoom <= 1 ? goToNextPage : undefined}
+                    isVisible={true}
                   />
                 </div>
               )}

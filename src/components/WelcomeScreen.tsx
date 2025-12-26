@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { storage } from '@/lib/storage';
@@ -13,6 +13,17 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
   const [name, setName] = useState('');
   const [selectedRole, setSelectedRole] = useState<number>(1);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Preload all role images on component mount
+  useEffect(() => {
+    const preloadRoleImages = () => {
+      [1, 2, 3, 4, 5].forEach((role) => {
+        const img = new Image();
+        img.src = `/role0${role}.png`;
+      });
+    };
+    preloadRoleImages();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

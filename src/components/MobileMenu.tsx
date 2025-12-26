@@ -94,48 +94,50 @@ const MobileMenu = ({
         </SheetHeader>
 
         <ScrollArea className="h-[calc(100vh-140px)]">
-          <div className="p-4 space-y-1">
+          <div className="p-4">
             {/* Quick Actions */}
-            <Button
-              variant="nav"
-              className="w-full justify-start gap-3 h-12"
-              onClick={() => {
-                const targetPage = currentPage === 1 ? 1 : storage.getLastPage();
-                handleNavigate(targetPage);
-              }}
-            >
-              <Home className="w-5 h-5 text-primary" />
-              <span>{currentPage === 1 ? '開始閱讀' : '繼續閱讀'}</span>
-            </Button>
+            <div className="space-y-0.5">
+              <Button
+                variant="nav"
+                className="w-full justify-start gap-3 h-10"
+                onClick={() => {
+                  const targetPage = currentPage === 1 ? 1 : storage.getLastPage();
+                  handleNavigate(targetPage);
+                }}
+              >
+                <Home className="w-5 h-5 text-primary" />
+                <span>{currentPage === 1 ? '開始閱讀' : '繼續閱讀'}</span>
+              </Button>
 
-            <Button
-              variant="nav"
-              className="w-full justify-start gap-3 h-12"
-              onClick={() => handleAction(onOpenQuiz)}
-            >
-              <HelpCircle className="w-5 h-5 text-secondary" />
-              <span>小小測驗王</span>
-              <span className="ml-auto text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
-                10題
-              </span>
-            </Button>
+              <Button
+                variant="nav"
+                className="w-full justify-start gap-3 h-10"
+                onClick={() => handleAction(onOpenQuiz)}
+              >
+                <HelpCircle className="w-5 h-5 text-secondary" />
+                <span>小小測驗王</span>
+                <span className="ml-auto text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
+                  10題
+                </span>
+              </Button>
 
-            <Button
-              variant="nav"
-              className="w-full justify-start gap-3 h-12"
-              onClick={() => handleAction(onOpenWorksheet)}
-            >
-              <FileText className="w-5 h-5 text-accent" />
-              <span>我的 AI 使用承諾</span>
-            </Button>
+              <Button
+                variant="nav"
+                className="w-full justify-start gap-3 h-10"
+                onClick={() => handleAction(onOpenWorksheet)}
+              >
+                <FileText className="w-5 h-5 text-accent" />
+                <span>我的 AI 使用承諾</span>
+              </Button>
+            </div>
 
             {/* Divider */}
-            <div className="py-2">
+            <div className="py-1.5 mt-1">
               <div className="border-t border-sidebar-border/50" />
             </div>
 
             {/* Chapter Navigation */}
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1 mt-1">
               📚 章節目錄
             </h3>
 
