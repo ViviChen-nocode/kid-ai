@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { storage } from '@/lib/storage';
 import { Sparkles, BookOpen } from 'lucide-react';
-import coverIllustration from '@/assets/cover-illustration.png';
+import coverIllustration from '@/assets/pic.png';
 
 interface WelcomeScreenProps {
   onComplete: (name: string) => void;
@@ -101,7 +101,7 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
 
         {/* Footer hint */}
         <p className="text-center text-muted-foreground text-sm mt-6">
-          教育部
+          根據教育部
           <a 
             href="https://pads.moe.edu.tw/pads/upload/%E4%B8%AD%E5%B0%8F%E5%AD%B8%E7%94%9F%E6%88%90%E5%BC%8FAI%E4%B9%8B%E5%AD%B8%E7%BF%92%E6%87%89%E7%94%A8%E6%89%8B%E5%86%8A-%E3%80%8A%E6%88%91%E5%92%8CAI%E4%B8%80%E8%B5%B7%E5%AD%B8%E3%80%8Bfor%E5%9C%8B%E5%B0%8F1141218.pdf"
             target="_blank"
@@ -110,6 +110,7 @@ const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
           >
             《國小生生成式AI學習應用手冊》
           </a>
+          製作
         </p>
       </div>
     </div>

@@ -44,7 +44,7 @@ const MobileMenu = ({
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden fixed top-4 left-4 z-50 bg-card shadow-soft rounded-full"
+          className="h-10 w-10 bg-card shadow-soft rounded-full"
         >
           <Menu className="w-5 h-5" />
         </Button>

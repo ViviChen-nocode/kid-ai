@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { storage } from '@/lib/storage';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Sidebar from './Sidebar';
 import MobileMenu from './MobileMenu';
@@ -23,6 +23,28 @@ const ReaderLayout = ({ userName, onReset }: ReaderLayoutProps) => {
   const [quizOpen, setQuizOpen] = useState(false);
   const [worksheetOpen, setWorksheetOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  // Reset zoom and position when page changes
+  useEffect(() => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  }, [currentPage]);
+
+  // Zoom controls
+  const handleZoomIn = () => {
+    setZoom((prev) => Math.min(prev + 0.25, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom((prev) => Math.max(prev - 0.25, 0.5));
+  };
+
+  const handleZoomReset = () => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
 
   const handleNavigate = (page: number) => {
     setCurrentPage(page);
@@ -85,38 +107,68 @@ const ReaderLayout = ({ userName, onReset }: ReaderLayoutProps) => {
         </>
       )}
 
-      {/* Mobile Menu */}
-      {isMobile && (
-        <MobileMenu
-          userName={userName}
-          currentPage={currentPage}
-          isOpen={mobileMenuOpen}
-          onOpenChange={setMobileMenuOpen}
-          onNavigate={handleNavigate}
-          onOpenQuiz={() => setQuizOpen(true)}
-          onOpenWorksheet={() => setWorksheetOpen(true)}
-          onOpenAbout={() => setAboutOpen(true)}
-          onReset={onReset}
-        />
-      )}
-
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-h-screen w-full">
         {/* Mobile Header */}
         {isMobile && (
-          <header className="h-16 bg-card border-b border-border flex items-center justify-center px-16">
-            <h1 className="font-display font-bold text-lg text-gradient">
+          <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 relative">
+            <MobileMenu
+              userName={userName}
+              currentPage={currentPage}
+              isOpen={mobileMenuOpen}
+              onOpenChange={setMobileMenuOpen}
+              onNavigate={handleNavigate}
+              onOpenQuiz={() => setQuizOpen(true)}
+              onOpenWorksheet={() => setWorksheetOpen(true)}
+              onOpenAbout={() => setAboutOpen(true)}
+              onReset={onReset}
+            />
+            <h1 className="font-display font-bold text-lg text-gradient absolute left-1/2 -translate-x-1/2">
               和你一起學 AI
             </h1>
+            <div className="w-10"></div>
           </header>
         )}
 
         {/* Desktop Header - Minimal */}
         {!isMobile && (
-          <header className="h-16 bg-transparent flex items-center justify-center">
-            <h1 className="font-display font-bold text-xl text-gradient">
+          <header className="h-10 bg-transparent flex items-center justify-between px-4">
+            <div className="flex-1"></div>
+            <h1 className="font-display font-bold text-xl text-gradient flex-1 text-center">
               和你一起學 AI
             </h1>
+            <div className="flex-1 flex justify-end items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-card/80 backdrop-blur-sm shadow-soft hover:shadow-card"
+                onClick={handleZoomOut}
+                disabled={zoom <= 0.5}
+                aria-label="縮小"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 rounded-full bg-card/80 backdrop-blur-sm shadow-soft hover:shadow-card text-xs"
+                onClick={handleZoomReset}
+                aria-label="重置縮放"
+              >
+                <Maximize2 className="w-3 h-3 mr-1.5" />
+                <span className="text-xs">{Math.round(zoom * 100)}%</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-card/80 backdrop-blur-sm shadow-soft hover:shadow-card"
+                onClick={handleZoomIn}
+                disabled={zoom >= 3}
+                aria-label="放大"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </Button>
+            </div>
           </header>
         )}
 
@@ -124,6 +176,10 @@ const ReaderLayout = ({ userName, onReset }: ReaderLayoutProps) => {
         <FlipbookReader
           currentPage={currentPage}
           onPageChange={setCurrentPage}
+          zoom={zoom}
+          setZoom={setZoom}
+          position={position}
+          setPosition={setPosition}
         />
       </main>
 

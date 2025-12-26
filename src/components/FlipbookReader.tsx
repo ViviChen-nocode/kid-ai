@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TOTAL_PAGES } from '@/lib/chapters';
 import { storage } from '@/lib/storage';
@@ -13,20 +13,21 @@ const getPageImagePath = (pageNum: number) => {
 // Separate component for rendering a page (hooks must be at top level)
 interface PageProps {
   pageNum: number;
+  shouldFlip: boolean;
   flipDirection: 'left' | 'right' | null;
   isMobile: boolean;
   onClick?: () => void;
 }
 
-const Page = ({ pageNum, flipDirection, isMobile, onClick }: PageProps) => {
+const Page = ({ pageNum, shouldFlip, flipDirection, isMobile, onClick }: PageProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   return (
     <div
       className={`relative bg-card rounded-lg shadow-card overflow-hidden transition-transform duration-300 ${onClick ? 'cursor-pointer' : ''}
-        ${flipDirection === 'left' && !isMobile ? 'animate-page-flip-left' : ''}
-        ${flipDirection === 'right' && !isMobile ? 'animate-page-flip-right' : ''}
+        ${shouldFlip && flipDirection === 'left' && !isMobile ? 'animate-page-flip-left' : ''}
+        ${shouldFlip && flipDirection === 'right' && !isMobile ? 'animate-page-flip-right' : ''}
       `}
       style={{
         aspectRatio: '210 / 297', // A4 ratio
@@ -78,14 +79,16 @@ const Page = ({ pageNum, flipDirection, isMobile, onClick }: PageProps) => {
 interface FlipbookReaderProps {
   currentPage: number;
   onPageChange: (page: number) => void;
+  zoom: number;
+  setZoom: (zoom: number | ((prev: number) => number)) => void;
+  position: { x: number; y: number };
+  setPosition: (position: { x: number; y: number } | ((prev: { x: number; y: number }) => { x: number; y: number })) => void;
 }
 
-const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
+const FlipbookReader = ({ currentPage, onPageChange, zoom, setZoom, position, setPosition }: FlipbookReaderProps) => {
   const isMobile = useIsMobile();
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipDirection, setFlipDirection] = useState<'left' | 'right' | null>(null);
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hasDragged, setHasDragged] = useState(false);
@@ -113,8 +116,9 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
       goToPage(currentPage - 1, 'right');
     } else {
       // Desktop: go back 2 pages for spread view
+      // When going back, right page flips left (away)
       const newPage = currentPage <= 2 ? 1 : currentPage - 2;
-      goToPage(newPage, 'right');
+      goToPage(newPage, 'left');
     }
   }, [currentPage, isMobile, goToPage]);
 
@@ -123,8 +127,9 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
       goToPage(currentPage + 1, 'left');
     } else {
       // Desktop: go forward 2 pages for spread view
+      // When going forward, left page flips right (away)
       const newPage = currentPage >= TOTAL_PAGES - 1 ? TOTAL_PAGES : currentPage + 2;
-      goToPage(newPage, 'left');
+      goToPage(newPage, 'right');
     }
   }, [currentPage, isMobile, goToPage]);
 
@@ -151,19 +156,6 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
   const leftPage = currentPage % 2 === 0 ? currentPage : currentPage - 1;
   const rightPage = currentPage % 2 === 0 ? currentPage + 1 : currentPage;
 
-  // Zoom controls
-  const handleZoomIn = useCallback(() => {
-    setZoom((prev) => Math.min(prev + 0.25, 3));
-  }, []);
-
-  const handleZoomOut = useCallback(() => {
-    setZoom((prev) => Math.max(prev - 0.25, 0.5));
-  }, []);
-
-  const handleZoomReset = useCallback(() => {
-    setZoom(1);
-    setPosition({ x: 0, y: 0 });
-  }, []);
 
   // Pan/Drag handlers for zoomed pages
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -238,17 +230,10 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
     if (zoom <= 1) {
       setPosition({ x: 0, y: 0 });
     }
-  }, [zoom]);
-
-  // Reset zoom and position when page changes
-  // This resets to 100% zoom and centers the new page content when navigating
-  useEffect(() => {
-    setZoom(1);
-    setPosition({ x: 0, y: 0 });
-  }, [currentPage]);
+  }, [zoom, setPosition]);
 
   return (
-    <div className="flex-1 flex flex-col items-center p-4 md:p-8 relative">
+    <div className="flex-1 flex flex-col items-center px-4 md:px-2 pt-0 md:pt-0 pb-4 md:pb-2 relative">
       {/* Navigation buttons - outside zoom container, always visible */}
       <Button
         variant="ghost"
@@ -280,7 +265,7 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
 
       {/* Book container with pan/drag support */}
       <div className="flex-1 w-full overflow-hidden flex items-center justify-center">
-        <div className={`relative w-full max-w-5xl ${isMobile ? 'max-w-md' : ''} flex items-center justify-center`}>
+        <div className={`relative w-full max-w-[950px] ${isMobile ? 'max-w-md' : ''} flex items-center justify-center`}>
           {/* Pages container with zoom and pan */}
           <div 
             className={`flex ${isCoverOrBack && !isMobile ? 'justify-center' : 'justify-center gap-1'} w-full transition-transform duration-300 origin-center ${zoom > 1 ? 'cursor-move' : ''}`}
@@ -295,15 +280,17 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
             <div className="w-full max-w-sm">
               <Page 
                 pageNum={currentPage} 
+                shouldFlip={!!flipDirection}
                 flipDirection={flipDirection} 
                 isMobile={isMobile}
               />
             </div>
           ) : isCoverOrBack ? (
             // Desktop: Single page for cover/back
-            <div className="w-1/2 max-w-md">
+            <div className="w-1/2">
               <Page 
                 pageNum={currentPage} 
+                shouldFlip={!!flipDirection}
                 flipDirection={flipDirection} 
                 isMobile={isMobile}
                 onClick={zoom <= 1 ? (currentPage === 1 ? goToNextPage : goToPrevPage) : undefined}
@@ -315,7 +302,8 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
               <div className="w-1/2 transform origin-right">
                 <Page 
                   pageNum={leftPage} 
-                  flipDirection={flipDirection} 
+                  shouldFlip={flipDirection === 'left'} // Left page flips when going back
+                  flipDirection={flipDirection === 'left' ? 'right' : null} // But flip direction is reversed
                   isMobile={isMobile} 
                   onClick={zoom <= 1 ? goToPrevPage : undefined}
                 />
@@ -324,7 +312,8 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
                 <div className="w-1/2 transform origin-left">
                   <Page 
                     pageNum={rightPage} 
-                    flipDirection={flipDirection} 
+                    shouldFlip={flipDirection === 'right'} // Right page flips when going forward
+                    flipDirection={flipDirection === 'right' ? 'left' : null} // But flip direction is reversed
                     isMobile={isMobile} 
                     onClick={zoom <= 1 ? goToNextPage : undefined}
                   />
@@ -336,39 +325,6 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
         </div>
       </div>
 
-      {/* Zoom controls - at the bottom */}
-      <div className="mt-6 flex items-center justify-center gap-2 z-20">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-10 w-10 rounded-full bg-card shadow-soft hover:shadow-card"
-          onClick={handleZoomOut}
-          disabled={zoom <= 0.5}
-          aria-label="縮小"
-        >
-          <ZoomOut className="w-5 h-5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-10 px-4 rounded-full bg-card shadow-soft hover:shadow-card"
-          onClick={handleZoomReset}
-          aria-label="重置縮放"
-        >
-          <Maximize2 className="w-4 h-4 mr-2" />
-          <span className="text-sm">{Math.round(zoom * 100)}%</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-10 w-10 rounded-full bg-card shadow-soft hover:shadow-card"
-          onClick={handleZoomIn}
-          disabled={zoom >= 3}
-          aria-label="放大"
-        >
-          <ZoomIn className="w-5 h-5" />
-        </Button>
-      </div>
     </div>
   );
 };
