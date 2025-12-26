@@ -144,8 +144,12 @@ const FlipbookReader = ({ currentPage, onPageChange }: FlipbookReaderProps) => {
   const isCoverOrBack = isFirstPage || isLastPage;
 
   // Calculate which pages to show in desktop spread view
+  // For a book spread: left page should be even, right page should be odd
+  // But we track by left page, so: pages 2-3, 4-5, 6-7, etc.
+  // If currentPage is odd (except 1), we show currentPage-1 and currentPage
+  // If currentPage is even, we show currentPage and currentPage+1
   const leftPage = currentPage % 2 === 0 ? currentPage : currentPage;
-  const rightPage = currentPage % 2 === 0 ? currentPage + 1 : currentPage + 1;
+  const rightPage = currentPage + 1;
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
