@@ -1,4 +1,4 @@
-import { Menu, X, Home, HelpCircle, FileText, User, ChevronRight, Book } from 'lucide-react';
+import { Menu, X, Home, HelpCircle, FileText, User, ChevronRight, Book, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { chapters } from '@/lib/chapters';
@@ -14,6 +14,7 @@ interface MobileMenuProps {
   onOpenQuiz: () => void;
   onOpenWorksheet: () => void;
   onOpenAbout: () => void;
+  onReset: () => void;
 }
 
 const MobileMenu = ({
@@ -25,6 +26,7 @@ const MobileMenu = ({
   onOpenQuiz,
   onOpenWorksheet,
   onOpenAbout,
+  onReset,
 }: MobileMenuProps) => {
   const handleNavigate = (page: number) => {
     onNavigate(page);
@@ -56,10 +58,24 @@ const MobileMenu = ({
                 {userName.charAt(0).toUpperCase()}
               </span>
             </div>
-            <div className="text-left">
+            <div className="text-left flex-1">
               <p className="text-sm text-muted-foreground">歡迎回來</p>
               <SheetTitle className="text-lg font-bold">{userName}</SheetTitle>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                onOpenChange(false);
+                if (confirm('確定要重新開始嗎？這將清除所有進度並返回首頁。')) {
+                  onReset();
+                }
+              }}
+              title="重新開始"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </Button>
           </div>
         </SheetHeader>
 
@@ -84,7 +100,7 @@ const MobileMenu = ({
               onClick={() => handleAction(onOpenQuiz)}
             >
               <HelpCircle className="w-5 h-5 text-secondary" />
-              <span>小測驗</span>
+              <span>小小測驗王</span>
               <span className="ml-auto text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
                 10題
               </span>
@@ -96,7 +112,7 @@ const MobileMenu = ({
               onClick={() => handleAction(onOpenWorksheet)}
             >
               <FileText className="w-5 h-5 text-accent" />
-              <span>學習單</span>
+              <span>我的 AI 使用承諾</span>
             </Button>
 
             {/* Divider */}

@@ -12,9 +12,10 @@ import AboutModal from './AboutModal';
 
 interface ReaderLayoutProps {
   userName: string;
+  onReset: () => void;
 }
 
-const ReaderLayout = ({ userName }: ReaderLayoutProps) => {
+const ReaderLayout = ({ userName, onReset }: ReaderLayoutProps) => {
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(() => storage.getLastPage());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -70,6 +71,7 @@ const ReaderLayout = ({ userName }: ReaderLayoutProps) => {
                 setAboutOpen(true);
                 setSidebarOpen(false);
               }}
+              onReset={onReset}
             />
           </div>
 
@@ -94,6 +96,7 @@ const ReaderLayout = ({ userName }: ReaderLayoutProps) => {
           onOpenQuiz={() => setQuizOpen(true)}
           onOpenWorksheet={() => setWorksheetOpen(true)}
           onOpenAbout={() => setAboutOpen(true)}
+          onReset={onReset}
         />
       )}
 

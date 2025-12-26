@@ -1,4 +1,4 @@
-import { Book, HelpCircle, FileText, User, ChevronRight, Home } from 'lucide-react';
+import { Book, HelpCircle, FileText, User, ChevronRight, Home, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { chapters } from '@/lib/chapters';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,6 +11,7 @@ interface SidebarProps {
   onOpenQuiz: () => void;
   onOpenWorksheet: () => void;
   onOpenAbout: () => void;
+  onReset: () => void;
 }
 
 const Sidebar = ({
@@ -20,6 +21,7 @@ const Sidebar = ({
   onOpenQuiz,
   onOpenWorksheet,
   onOpenAbout,
+  onReset,
 }: SidebarProps) => {
   return (
     <aside className="w-72 h-full bg-sidebar border-r border-sidebar-border flex flex-col">
@@ -31,10 +33,23 @@ const Sidebar = ({
               {userName.charAt(0).toUpperCase()}
             </span>
           </div>
-          <div>
+          <div className="flex-1">
             <p className="text-sm text-muted-foreground">歡迎回來</p>
             <p className="font-bold text-foreground">{userName}</p>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              if (confirm('確定要重新開始嗎？這將清除所有進度並返回首頁。')) {
+                onReset();
+              }
+            }}
+            title="重新開始"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
@@ -60,7 +75,7 @@ const Sidebar = ({
             onClick={onOpenQuiz}
           >
             <HelpCircle className="w-5 h-5 text-secondary" />
-            <span>小測驗</span>
+            <span>小小測驗王</span>
             <span className="ml-auto text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
               10題
             </span>
@@ -72,7 +87,7 @@ const Sidebar = ({
             onClick={onOpenWorksheet}
           >
             <FileText className="w-5 h-5 text-accent" />
-            <span>學習單</span>
+            <span>我的 AI 使用承諾</span>
           </Button>
         </div>
 

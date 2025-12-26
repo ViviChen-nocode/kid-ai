@@ -21,6 +21,11 @@ const Index = () => {
     setUserName(name);
   };
 
+  const handleReset = () => {
+    storage.clearAll();
+    setUserName(null);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen gradient-sunset flex items-center justify-center">
@@ -41,7 +46,7 @@ const Index = () => {
       </Helmet>
 
       {userName ? (
-        <ReaderLayout userName={userName} />
+        <ReaderLayout userName={userName} onReset={handleReset} />
       ) : (
         <WelcomeScreen onComplete={handleWelcomeComplete} />
       )}
