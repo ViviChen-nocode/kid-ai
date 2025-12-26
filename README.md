@@ -1,73 +1,183 @@
-# Welcome to your Lovable project
+# 🤖 和你一起學 AI - 國小生 AI 學習手冊
 
-## Project info
+一個專為國小生設計的互動式 AI 學習手冊閱讀器，基於教育部《國小生生成式AI學習應用手冊》製作。
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## ✨ 功能特色
 
-## How can I edit this code?
+### 📖 互動式閱讀體驗
+- **翻頁式閱讀器**：模擬真實書本翻頁效果，提供流暢的閱讀體驗
+- **章節目錄導航**：快速跳轉到各個章節，輕鬆瀏覽內容
+- **閱讀進度記錄**：自動記錄閱讀進度，下次回來可繼續閱讀
+- **響應式設計**：支援桌面和行動裝置，隨時隨地學習
 
-There are several ways of editing your application.
+### 🎯 AI 知識小測驗
+- **10 道精選題目**：測試對 AI 知識的理解程度
+- **即時反饋**：答題後立即顯示正確答案與詳細解釋
+- **獎勵機制**：答對 7 題以上可獲得 AI 學習小達人獎勵卡
 
-**Use Lovable**
+### 📝 AI 使用承諾卡
+- **5 大承諾項目**：引導學生正確使用 AI 工具
+  - 我會自己負責
+  - 我會清楚分辨
+  - 我會主動標記
+  - 我會動腦判斷
+  - 我會學會提問
+- **個性化簽名**：可填寫簽名並下載成圖片保存
+- **驗證機制**：確保所有承諾項目都已勾選才能下載
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 🎨 個人化體驗
+- **角色選擇**：5 種可愛角色可選擇
+- **使用者名稱**：個人化的歡迎訊息
+- **進度追蹤**：記錄閱讀進度和測驗成績
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 快速開始
 
-**Use your preferred IDE**
+### 環境需求
+- Node.js 18+ 
+- npm 或 yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 安裝步驟
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# 1. 克隆專案
+git clone https://github.com/ViviChen-nocode/kid-ai.git
+cd kid-ai-reader
 
-Follow these steps:
+# 2. 安裝依賴
+npm install
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. 啟動開發伺服器
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+開啟瀏覽器訪問 `http://localhost:5173` 即可開始使用。
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 建置生產版本
 
-**Use GitHub Codespaces**
+```bash
+# 建置
+npm run build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# 預覽建置結果
+npm run preview
+```
 
-## What technologies are used for this project?
+## 📁 專案結構
 
-This project is built with:
+```
+kid-ai-reader/
+├── public/                 # 靜態資源
+│   ├── pages/             # 手冊頁面圖片
+│   ├── role*.png          # 角色圖片
+│   └── manifest.json      # PWA 設定
+├── src/
+│   ├── components/        # React 元件
+│   │   ├── FlipbookReader.tsx    # 翻頁閱讀器
+│   │   ├── QuizModal.tsx         # 測驗模態框
+│   │   ├── WorksheetModal.tsx    # 承諾卡模態框
+│   │   ├── WelcomeScreen.tsx      # 歡迎畫面
+│   │   ├── Sidebar.tsx            # 側邊欄（桌面版）
+│   │   ├── MobileMenu.tsx         # 選單（行動版）
+│   │   └── ui/                    # UI 元件庫
+│   ├── lib/               # 工具函數
+│   │   ├── chapters.ts    # 章節資料
+│   │   ├── quizData.ts    # 測驗題目
+│   │   └── storage.ts     # 本地儲存
+│   ├── pages/             # 頁面元件
+│   └── hooks/             # 自訂 Hooks
+└── package.json
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🛠️ 技術棧
 
-## How can I deploy this project?
+- **前端框架**：React 18 + TypeScript
+- **建置工具**：Vite
+- **樣式**：Tailwind CSS
+- **UI 元件**：Radix UI + shadcn/ui
+- **路由**：React Router
+- **狀態管理**：React Hooks + LocalStorage
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 📚 章節內容
 
-## Can I connect a custom domain to my Lovable project?
+1. **手冊定位與理念** 📖
+2. **第一章：AI是什麼？我也能懂！** 🤖
+3. **第二章：怎麼和 AI 溝通？** 💬
+4. **第三章：AI小任務—我來試試看！** 🎯
+5. **第四章：AI說的一定對嗎？** 🤔
+6. **第五章：AI幫助我學習** 📚
+7. **第六章：AI時代的好公民** 🌟
 
-Yes, you can!
+## 🎯 使用說明
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### 首次使用
+1. 進入網站後，輸入你的名字
+2. 選擇一個喜歡的角色
+3. 開始閱讀手冊內容
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### 閱讀手冊
+- 使用左右箭頭或點擊頁面來翻頁
+- 點擊側邊欄的章節標題可快速跳轉
+- 閱讀進度會自動保存
+
+### 參與測驗
+1. 點擊「小小測驗王」進入測驗
+2. 回答 10 道題目
+3. 答對 7 題以上可下載獎勵卡
+
+### 簽署承諾卡
+1. 點擊「我的 AI 使用承諾」
+2. 勾選所有 5 個承諾項目
+3. 填寫簽名（可選）
+4. 下載承諾卡圖片保存
+
+## 📝 開發說明
+
+### 新增章節
+編輯 `src/lib/chapters.ts` 檔案，新增章節資訊：
+
+```typescript
+{
+  id: 'chapter-7',
+  title: '第七章：新章節標題',
+  startPage: 75,
+  icon: '🎉',
+}
+```
+
+### 新增測驗題目
+編輯 `src/lib/quizData.ts` 檔案，新增題目：
+
+```typescript
+{
+  id: 11,
+  question: '題目內容',
+  options: ['選項1', '選項2', '選項3', '選項4'],
+  correctAnswer: 1,
+  chapter: '第一章',
+  explanation: '解釋說明',
+}
+```
+
+## 🤝 貢獻
+
+歡迎提交 Issue 或 Pull Request！
+
+## 📄 授權
+
+本專案基於教育部《國小生生成式AI學習應用手冊》製作，僅供教育用途。
+
+## 👨‍💻 作者
+
+**Vivi Chen 大師姐**
+
+- 網站架設者
+- 專案維護者
+
+## 🙏 致謝
+
+- 教育部《國小生生成式AI學習應用手冊》內容提供
+- 所有參與測試和提供建議的使用者
+
+---
+
+**讓 AI 成為孩子學習的好夥伴！** 🌟
