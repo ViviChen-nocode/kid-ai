@@ -257,9 +257,9 @@ kid-ai-reader/
 - 網站架設者
 - 專案維護者
 
-Facebook: [@vivichen.sister](https://www.facebook.com/vivichen.sister)  
-IG: [@thevividai.vi](https://www.instagram.com/thevividai.vi/)  
-個人網站: [https://vivichen.ai](https://vivichen.ai)  
+Facebook 粉絲專頁: [大師姐 Vivi](https://www.facebook.com/viviche.sister)
+Instagram: [@thevividai.vi](https://www.instagram.com/thevividai.vi)
+個人網站: [https://vivichen.ai](https://vivichen.ai)
 如有問題歡迎透過 [GitHub Issues](https://github.com/ViviChen-nocode/kid-ai/issues) 聯繫
 
 ## 🙏 致謝
